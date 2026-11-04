@@ -75,6 +75,36 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 
 <details>
+    <summary><b>Extracting the article DOM without serialization</b></summary>
+
+`Readability::extract` consumes the reader and returns the processed document,
+content root and metadata. It uses the same extraction as `parse`, without
+building the article's HTML, text or Markdown strings, or counting text length.
+The DOM types are available through the re-exported `dom_query` crate.
+
+```rust
+use dom_smoothie::{Readability, dom_query::Document};
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let document = Document::from(
+        "<article><p>Readable content with <a href='/docs'>a link</a>.</p></article>",
+    );
+    let extracted = Readability::with_document(
+        document,
+        Some("https://example.com/article"),
+        None,
+    )?.extract()?;
+
+    println!("Title: {}", extracted.metadata.title);
+    for link in extracted.selection().select("a").nodes() {
+        println!("Link: {}", link.attr_or("href", ""));
+    }
+    Ok(())
+}
+```
+</details>
+
+<details>
     <summary><b>Parsing only metadata</b></summary>
 
 
